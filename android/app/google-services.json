@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "823232799901",
+    "project_id": "menti-quiz-app",
+    "storage_bucket": "menti-quiz-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:823232799901:android:babd013cb9a7fba4e82074",
+        "android_client_info": {
+          "package_name": "com.example.quiz_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "823232799901-gahqi94gc92puavarv4k32kuaf1jubs9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.quiz_app",
+            "certificate_hash": "43e6132c417c212dee2d16428017f47b37f38580"
+          }
+        },
+        {
+          "client_id": "823232799901-2aipmhmmc891e95i0i56ig7ts4ip3cht.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCLHnpExUx1UdoGDmRgCBDciGNewCnCW4c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "823232799901-2aipmhmmc891e95i0i56ig7ts4ip3cht.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
