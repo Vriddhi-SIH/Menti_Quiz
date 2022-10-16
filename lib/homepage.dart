@@ -27,14 +27,15 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void initData() async {
-    desc2 = await GetData2();
-    options = await GetData();
+    // desc2 = await GetData2();100
+    // options = await GetData();
 
     setState(() {});
   }
 
   int _counter = 0;
   int? data3;
+  List<Data2>? data1;
   Future<List<Data2>> GetData2() async {
     var val = await FirebaseFirestore.instance
         .collection('quiz')
@@ -53,21 +54,21 @@ class _MyHomePageState extends State<MyHomePage> {
     return [];
   }
 
-  Future<List<Options>> GetData() async {
+  Future<List<Options>> GetData(int index) async {
     var val = await FirebaseFirestore.instance
         .collection('quiz')
         .doc('${widget.title}')
         .collection('questions')
-        .doc('$data3')
+        .doc('${index + 1}')
         .collection('answers')
         .get();
     var documents = val.docs;
     if (documents.isNotEmpty) {
+      await Future.delayed(Duration(seconds: 5));
       return documents.map((document) {
         Options bookingList =
             Options.fromMap(Map<String, dynamic>.from(document.data()));
 
-        // print(bookingList);
         return bookingList;
       }).toList();
     }
@@ -75,17 +76,18 @@ class _MyHomePageState extends State<MyHomePage> {
     return [];
   }
 
-  void _incrementCounter() {
-    Navigator.of(context).push(MaterialPageRoute(
-        builder: (conetx) => IntervalPage(
-              ids: widget.title,
-              quesid: widget.quesIndec,
-            )));
-    // final fi =
-    //     FirebaseFirestore.instance.collection('quiz').doc('${widget.title}');
+  void _incrementCounter(int index) {
+    if ((index + 1) >= 3) {
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => IntervalPage()),
+          (route) => false);
+    } else {
+      final fi =
+          FirebaseFirestore.instance.collection('quiz').doc('${widget.title}');
 
-    // fi.update({"index": 1});
-    // setState(() {});
+      fi.update({"index": index + 1});
+    }
   }
 
   @override
@@ -104,49 +106,31 @@ class _MyHomePageState extends State<MyHomePage> {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const Center(child: Text("Loading"));
             }
+
             data3 = snapshot.data?['index'];
-            // print(object)
-            // data3 = 1;
             print(data3);
             return Center(
-              // Center is a layout widget. It takes a single child and positions it
-              // in the middle of the parent.
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   FutureBuilder<List<Data2>>(
-                    future:
-                        GetData2(), // a previously-obtained Future<String> or null
+                    future: GetData2(),
                     builder: (BuildContext context,
                         AsyncSnapshot<List<Data2>> snapshot) {
                       List<Widget> children;
                       if (snapshot.hasData) {
-                        List<Data2> data1 = snapshot.data as List<Data2>;
+                        data1 = snapshot.data as List<Data2>;
                         children = <Widget>[
                           Padding(
                             padding: const EdgeInsets.only(top: 16),
                             child: Text(
-                              '${data1[data3!].desc}',
+                              '${data1?[data3!].desc}?'.toUpperCase(),
                               style: TextStyle(fontSize: 30),
                             ),
                           ),
-                          Container(
-                              height: 200,
-                              width: MediaQuery.of(context).size.width,
-                              child: ListView.builder(
-                                itemBuilder: ((context, index) {
-                                  return Text(options[index].answer);
-                                }),
-                                itemCount: options.length,
-                              )),
                         ];
                       } else if (snapshot.hasError) {
                         children = <Widget>[
-                          const Icon(
-                            Icons.error_outline,
-                            color: Colors.red,
-                            size: 60,
-                          ),
                           Padding(
                             padding: const EdgeInsets.only(top: 16),
                             child: Text('Error: ${snapshot.error}'),
@@ -154,14 +138,87 @@ class _MyHomePageState extends State<MyHomePage> {
                         ];
                       } else {
                         children = const <Widget>[
-                          SizedBox(
-                            width: 60,
-                            height: 60,
-                            child: CircularProgressIndicator(),
-                          ),
                           Padding(
                             padding: EdgeInsets.only(top: 16),
                             child: Text('Awaiting result...'),
+                          ),
+                        ];
+                      }
+                      return Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: children,
+                        ),
+                      );
+                    },
+                  ),
+                  FutureBuilder<List<Options>>(
+                    future: GetData(data3 as int),
+                    builder: (BuildContext context,
+                        AsyncSnapshot<List<Options>> snapshot) {
+                      List<Widget> children;
+                      if (snapshot.hasData) {
+                        List<Options> data5 = snapshot.data as List<Options>;
+                        // print('$data1')
+                        children = <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: Column(
+                              children: [
+                                Container(
+                                  width:
+                                      MediaQuery.of(context).size.width / 1.5,
+                                  height: 500,
+                                  child: ListView.builder(
+                                    itemBuilder: ((context, index) {
+                                      // print(data1);
+                                      return Padding(
+                                        padding: const EdgeInsets.fromLTRB(
+                                            0, 5, 0, 5),
+                                        child: InkWell(
+                                          onTap: () {
+                                            if (data1?[data3!].anser ==
+                                                data5[index].identi) {
+                                              print('1');
+                                            }
+                                          },
+                                          child: Container(
+                                            // width: 100,
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(5),
+                                                color: Colors.blue[200]),
+                                            height: 50,
+                                            child: Center(
+                                              child: Text(
+                                                '${data5[index].answer}',
+                                                style: TextStyle(fontSize: 20),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                    itemCount: data5.length,
+                                  ),
+                                )
+                                //   Text(
+                              ],
+                            ),
+                          ),
+                        ];
+                      } else if (snapshot.hasError) {
+                        children = <Widget>[
+                          Padding(
+                            padding: const EdgeInsets.only(top: 16),
+                            child: Text('Error: ${snapshot.error}'),
+                          ),
+                        ];
+                      } else {
+                        children = const <Widget>[
+                          Padding(
+                            padding: EdgeInsets.only(top: 16),
+                            child: Text('Answer Fast To Get More Points...'),
                           ),
                         ];
                       }
@@ -178,7 +235,9 @@ class _MyHomePageState extends State<MyHomePage> {
             );
           }),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
+        onPressed: (() {
+          _incrementCounter(data3 as int);
+        }),
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ),
@@ -190,36 +249,20 @@ class Data2 {
   String desc;
   String anser;
 
-  // double amount;
-  // String time;
-  // String type;
-  // int id;
-
   Data2(
       {
       // {required this.amount,
       required this.desc,
       required this.anser});
-  // required this.time,
-  // required this.type,
-  // required this.id});
 
   Data2.fromMap(Map map)
       : desc = map['ques'],
 
         // amount = double.parse('${map['Amount']}'),
         anser = map['correcAnswer'];
-  // type = map['type'],
-  // id = map['id'];
 
   Map toMap() {
-    return {
-      'description': desc
-      // 'Amount': amount,
-      // 'time': time,
-      // 'type': type,
-      // 'id': id
-    };
+    return {'description': desc};
   }
 }
 
