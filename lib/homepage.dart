@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:quiz_app/intervalPage.dart';
 import 'package:quiz_app/main.dart';
+import 'package:quiz_app/pages/intervalPage.dart';
+import 'package:quiz_app/pages/leaderboardPage.dart';
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({super.key, required this.title, required this.quesIndec});
+  MyHomePage({super.key, required this.title});
   final String title;
-  int quesIndec;
+  // int quesIndec;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -17,21 +21,95 @@ class _MyHomePageState extends State<MyHomePage> {
       FirebaseFirestore.instance.collection('quiz').doc('$id2').snapshots();
   List<Data2> desc2 = [];
   List<Options> options = [];
+  Timer? _timer;
+  int remainSeconds = 1;
+  String time = '05';
+  // String time2 = '00:05';
+  void _startTimer(
+    int seconds,
+  ) {
+    const duration = Duration(seconds: 1);
+    remainSeconds = seconds;
+    _timer = Timer.periodic(
+      duration,
+      (Timer timer) {
+        if (remainSeconds == 0) {
+          _startTimer2(5);
+          setState(() {
+            time = '00';
+          });
+          timer.cancel();
+        } else {
+          // int minutes = remainSeconds ~/ 60;
+          int seconds = (remainSeconds % 60);
+          setState(() {
+            time = "${seconds.toString().padLeft(2, "0")}";
+          });
+
+          print(time);
+          remainSeconds--;
+        }
+      },
+    );
+  }
+
+  Timer? _timer2;
+  int remainSeconds2 = 1;
+  // String time = '00:05';
+  String time2 = '05';
+  void _startTimer2(int seconds) {
+    const duration = Duration(seconds: 1);
+    remainSeconds2 = seconds;
+    _timer = Timer.periodic(
+      duration,
+      (Timer timer) {
+        if (remainSeconds2 == 0) {
+          setState(() {
+            time2 = '00';
+          });
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: ((context) => Interval3())));
+          timer.cancel();
+        } else {
+          // int minutes = remainSeconds2 ~/ 60;
+          int seconds = (remainSeconds2 % 60);
+          setState(() {
+            time2 = "${seconds.toString().padLeft(2, "0")}";
+          });
+
+          print(time2);
+          remainSeconds2--;
+        }
+      },
+    );
+  }
+
   @override
   void initState() {
-    initData();
+    // initData();
+    _startTimer(5);
 
     setState(() {});
 
     super.initState();
   }
 
-  void initData() async {
-    // desc2 = await GetData2();100
-    // options = await GetData();
+  @override
+  void dispose() {
+    // TODO: implement dispose
 
-    setState(() {});
+    _timer?.cancel();
+    _timer2?.cancel();
+    _usersStream.drain();
+    super.dispose();
   }
+
+  // void initData() async {
+  //   // desc2 = await GetData2();100
+  //   // options = await GetData();
+
+  //   setState(() {});
+  // }
 
   int _counter = 0;
   int? data3;
@@ -63,8 +141,8 @@ class _MyHomePageState extends State<MyHomePage> {
         .collection('answers')
         .get();
     var documents = val.docs;
-    if (documents.isNotEmpty) {
-      await Future.delayed(Duration(seconds: 5));
+    if (documents.isNotEmpty && time == '00') {
+      // _startTimer2(5);
       return documents.map((document) {
         Options bookingList =
             Options.fromMap(Map<String, dynamic>.from(document.data()));
@@ -92,154 +170,166 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: StreamBuilder<DocumentSnapshot>(
-          stream: _usersStream,
-          builder:
-              (BuildContext context, AsyncSnapshot<DocumentSnapshot> snapshot) {
-            if (snapshot.hasError) {
-              return const Text('Something went wrong');
-            }
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: Text("Loading"));
-            }
+    return WillPopScope(
+      onWillPop: () async {
+        return false;
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text('$time || $time2'),
+        ),
+        body: StreamBuilder<DocumentSnapshot>(
+            stream: _usersStream,
+            builder: (BuildContext context,
+                AsyncSnapshot<DocumentSnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return const Text('Something went wrong');
+              }
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: Text("Loading"));
+              }
 
-            data3 = snapshot.data?['index'];
-            print(data3);
-            return Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  FutureBuilder<List<Data2>>(
-                    future: GetData2(),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<List<Data2>> snapshot) {
-                      List<Widget> children;
-                      if (snapshot.hasData) {
-                        data1 = snapshot.data as List<Data2>;
-                        children = <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Text(
-                              '${data1?[data3!].desc}?'.toUpperCase(),
-                              style: TextStyle(fontSize: 30),
+              data3 = snapshot.data?['index'];
+              // print(data3);
+
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    FutureBuilder<List<Data2>>(
+                      future: GetData2(),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<List<Data2>> snapshot) {
+                        List<Widget> children;
+                        if (snapshot.hasData) {
+                          data1 = snapshot.data as List<Data2>;
+                          children = <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Text(
+                                '${data1?[data3!].desc}?'.toUpperCase(),
+                                style: TextStyle(fontSize: 30),
+                              ),
                             ),
+                          ];
+                        } else if (snapshot.hasError) {
+                          children = <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Text('Error: ${snapshot.error}'),
+                            ),
+                          ];
+                        } else {
+                          children = const <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(top: 16),
+                              child: Text('Awaiting result...'),
+                            ),
+                          ];
+                        }
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: children,
                           ),
-                        ];
-                      } else if (snapshot.hasError) {
-                        children = <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Text('Error: ${snapshot.error}'),
-                          ),
-                        ];
-                      } else {
-                        children = const <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(top: 16),
-                            child: Text('Awaiting result...'),
-                          ),
-                        ];
-                      }
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: children,
-                        ),
-                      );
-                    },
-                  ),
-                  FutureBuilder<List<Options>>(
-                    future: GetData(data3 as int),
-                    builder: (BuildContext context,
-                        AsyncSnapshot<List<Options>> snapshot) {
-                      List<Widget> children;
-                      if (snapshot.hasData) {
-                        List<Options> data5 = snapshot.data as List<Options>;
-                        // print('$data1')
-                        children = <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Column(
-                              children: [
-                                Container(
-                                  width:
-                                      MediaQuery.of(context).size.width / 1.5,
-                                  height: 500,
-                                  child: ListView.builder(
-                                    itemBuilder: ((context, index) {
-                                      // print(data1);
-                                      return Padding(
-                                        padding: const EdgeInsets.fromLTRB(
-                                            0, 5, 0, 5),
-                                        child: InkWell(
-                                          onTap: () {
-                                            if (data1?[data3!].anser ==
-                                                data5[index].identi) {
-                                              print('1');
-                                            }
-                                          },
-                                          child: Container(
-                                            // width: 100,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(5),
-                                                color: Colors.blue[200]),
-                                            height: 50,
-                                            child: Center(
-                                              child: Text(
-                                                '${data5[index].answer}',
-                                                style: TextStyle(fontSize: 20),
+                        );
+                      },
+                    ),
+                    FutureBuilder<List<Options>>(
+                      future: GetData(data3 as int),
+                      builder: (BuildContext context,
+                          AsyncSnapshot<List<Options>> snapshot) {
+                        List<Widget> children;
+                        if (snapshot.hasData) {
+                          List<Options> data5 = snapshot.data as List<Options>;
+                          // _startTimer2(5);
+                          children = <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    width:
+                                        MediaQuery.of(context).size.width / 1.5,
+                                    height: 500,
+                                    child: ListView.builder(
+                                      itemBuilder: ((context, index) {
+                                        // print(data1);
+                                        return Padding(
+                                          padding: const EdgeInsets.fromLTRB(
+                                              0, 5, 0, 5),
+                                          child: InkWell(
+                                            onTap: () {
+                                              if (data1?[data3!].anser ==
+                                                  data5[index].identi) {
+                                                print('1');
+                                              }
+
+                                              Navigator.of(context).push(
+                                                  MaterialPageRoute(
+                                                      builder: ((context) =>
+                                                          Interval2())));
+                                            },
+                                            child: Container(
+                                              // width: 100,
+                                              decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(5),
+                                                  color: Colors.blue[200]),
+                                              height: 50,
+                                              child: Center(
+                                                child: Text(
+                                                  '${data5[index].answer}',
+                                                  style:
+                                                      TextStyle(fontSize: 20),
+                                                ),
                                               ),
                                             ),
                                           ),
-                                        ),
-                                      );
-                                    }),
-                                    itemCount: data5.length,
-                                  ),
-                                )
-                                //   Text(
-                              ],
+                                        );
+                                      }),
+                                      itemCount: data5.length,
+                                    ),
+                                  )
+                                  //   Text(
+                                ],
+                              ),
                             ),
+                          ];
+                        } else if (snapshot.hasError) {
+                          children = <Widget>[
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16),
+                              child: Text('Error: ${snapshot.error}'),
+                            ),
+                          ];
+                        } else {
+                          children = const <Widget>[
+                            Padding(
+                              padding: EdgeInsets.only(top: 16),
+                              child: Text('Answer Fast To Get More Points...'),
+                            ),
+                          ];
+                        }
+                        return Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: children,
                           ),
-                        ];
-                      } else if (snapshot.hasError) {
-                        children = <Widget>[
-                          Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: Text('Error: ${snapshot.error}'),
-                          ),
-                        ];
-                      } else {
-                        children = const <Widget>[
-                          Padding(
-                            padding: EdgeInsets.only(top: 16),
-                            child: Text('Answer Fast To Get More Points...'),
-                          ),
-                        ];
-                      }
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: children,
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
-            );
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }),
+        floatingActionButton: FloatingActionButton(
+          onPressed: (() {
+            _incrementCounter(data3 as int);
           }),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (() {
-          _incrementCounter(data3 as int);
-        }),
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
+          tooltip: 'Increment',
+          child: const Icon(Icons.add),
+        ),
       ),
     );
   }

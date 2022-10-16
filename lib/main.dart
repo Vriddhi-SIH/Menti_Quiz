@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
@@ -8,16 +10,12 @@ import 'homepage.dart';
 String id2 = '';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // initializing the firebase app
   await Firebase.initializeApp();
   runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -25,8 +23,8 @@ class MyApp extends StatelessWidget {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        home: HomePage());
-    // home: UserInformation());
+        debugShowCheckedModeBanner: false,
+        home: const HomePage());
   }
 }
 
@@ -40,7 +38,7 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   List<QuizID> quizId = [];
   String error = '';
-  Future<List<QuizID>> GetData2() async {
+  Future<List<QuizID>> getAllID() async {
     var val = await FirebaseFirestore.instance.collection('ids').get();
     var documents = val.docs;
     if (documents.isNotEmpty) {
@@ -55,14 +53,13 @@ class _HomePageState extends State<HomePage> {
   }
 
   void getInitData() async {
-    quizId = await GetData2();
+    quizId = await getAllID();
     setState(() {});
   }
 
   @override
   void initState() {
     getInitData();
-    // TODO: implement initState
     setState(() {});
     super.initState();
   }
@@ -73,21 +70,18 @@ class _HomePageState extends State<HomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          SizedBox(
+          const SizedBox(
             height: 50,
           ),
-          Text(
+          const Text(
             'Enter Quiz Id',
             style: TextStyle(
                 color: Colors.blue, fontSize: 40, fontWeight: FontWeight.bold),
           ),
-          Container(
+          SizedBox(
             height: 50,
             width: 200,
-            child: TextFormField(
-                // decoration: InputDecoration(border: Bor),
-                // initialValue: "Enter Quiz Id",
-                onChanged: ((value) {
+            child: TextFormField(onChanged: ((value) {
               setState(() {
                 id2 = value;
               });
@@ -95,15 +89,13 @@ class _HomePageState extends State<HomePage> {
           ),
           ElevatedButton(
               onPressed: () {
-                print(id2);
                 for (int i = 0; i < quizId.length; i++) {
                   if ('${quizId[i].id}' == id2) {
                     error = '';
-                    print('object');
                     Navigator.of(context).push(MaterialPageRoute(
                         builder: ((context) => MyHomePage(
                               title: id2,
-                              quesIndec: 00000001,
+                              // quesIndec: 1,
                             ))));
                   } else {
                     setState(() {
@@ -112,10 +104,10 @@ class _HomePageState extends State<HomePage> {
                   }
                 }
               },
-              child: Text('Enter')),
+              child: const Text('Enter')),
           Text(
             "$error",
-            style: TextStyle(color: Colors.red, fontSize: 20),
+            style: const TextStyle(color: Colors.red, fontSize: 20),
           )
         ],
       ),
