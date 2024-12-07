@@ -4,6 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 
 import 'package:flutter/material.dart';
+import 'package:quiz_app/pages/detailsPage.dart';
+import 'package:quiz_app/pages/leaderboardPage.dart';
 
 import 'homepage.dart';
 
@@ -93,10 +95,7 @@ class _HomePageState extends State<HomePage> {
                   if ('${quizId[i].id}' == id2) {
                     error = '';
                     Navigator.of(context).push(MaterialPageRoute(
-                        builder: ((context) => MyHomePage(
-                              title: id2,
-                              // quesIndec: 1,
-                            ))));
+                        builder: ((context) => const DetailsPAge())));
                   } else {
                     setState(() {
                       error = 'Wrong Quiz ID';

@@ -8,7 +8,7 @@ import 'package:quiz_app/pages/intervalPage.dart';
 import 'package:quiz_app/pages/leaderboardPage.dart';
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({super.key, required this.title});
+  const MyHomePage({super.key, required this.title});
   final String title;
   // int quesIndec;
 
@@ -24,7 +24,22 @@ class _MyHomePageState extends State<MyHomePage> {
   Timer? _timer;
   int remainSeconds = 1;
   String time = '05';
-  // String time2 = '00:05';
+  // void getTime()async{
+  //   var val = await FirebaseFirestore.instance
+  //       .collection('quiz')
+  //       .doc('${widget.title}')
+
+  //       .get();
+  //   var documents = val.docs;
+  //   if (documents.isNotEmpty) {
+  //     return documents.map((document) {
+  //       Data2 bookingList =
+  //           Data2.fromMap(Map<String, dynamic>.from(document.data()));
+  //       return bookingList;
+  //     }).toList();
+  // }
+
+  // }
   void _startTimer(
     int seconds,
   ) {
@@ -40,8 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
           });
           timer.cancel();
         } else {
-          // int minutes = remainSeconds ~/ 60;
-          int seconds = (remainSeconds % 60);
+          int seconds = (remainSeconds);
           setState(() {
             time = "${seconds.toString().padLeft(2, "0")}";
           });
@@ -54,7 +68,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Timer? _timer2;
-  int remainSeconds2 = 1;
+  int remainSeconds2 = 0;
   // String time = '00:05';
   String time2 = '05';
   void _startTimer2(int seconds) {
@@ -71,14 +85,15 @@ class _MyHomePageState extends State<MyHomePage> {
               .push(MaterialPageRoute(builder: ((context) => Interval3())));
           timer.cancel();
         } else {
-          // int minutes = remainSeconds2 ~/ 60;
-          int seconds = (remainSeconds2 % 60);
+          // double s3 = remainSeconds2 % 1000;
+          int seconds = (remainSeconds2);
+
           setState(() {
             time2 = "${seconds.toString().padLeft(2, "0")}";
           });
 
-          print(time2);
-          remainSeconds2--;
+          // print(time2);
+          remainSeconds2 = remainSeconds2 - 1;
         }
       },
     );
@@ -86,30 +101,18 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   void initState() {
-    // initData();
     _startTimer(5);
-
     setState(() {});
-
     super.initState();
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
-
     _timer?.cancel();
     _timer2?.cancel();
     _usersStream.drain();
     super.dispose();
   }
-
-  // void initData() async {
-  //   // desc2 = await GetData2();100
-  //   // options = await GetData();
-
-  //   setState(() {});
-  // }
 
   int _counter = 0;
   int? data3;
@@ -339,16 +342,10 @@ class Data2 {
   String desc;
   String anser;
 
-  Data2(
-      {
-      // {required this.amount,
-      required this.desc,
-      required this.anser});
+  Data2({required this.desc, required this.anser});
 
   Data2.fromMap(Map map)
       : desc = map['ques'],
-
-        // amount = double.parse('${map['Amount']}'),
         anser = map['correcAnswer'];
 
   Map toMap() {
@@ -359,27 +356,9 @@ class Data2 {
 class Options {
   String answer;
   String identi;
-
-  // double amount;
-  // String time;
-  // String type;
-  // int id;
-
-  Options(
-      {
-      // {required this.amount,
-      required this.answer,
-      required this.identi});
-  // required this.time,
-  // required this.type,
-  // required this.id});
+  Options({required this.answer, required this.identi});
 
   Options.fromMap(Map map)
       : identi = map['identifier'],
-
-        // amount = double.parse('${map['Amount']}'),
         answer = map['answer'];
-  // type = map['type'],
-  // id = map['id'];
-
 }

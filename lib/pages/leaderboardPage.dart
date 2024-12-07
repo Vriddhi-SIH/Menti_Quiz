@@ -40,9 +40,6 @@ class _Interval3State extends State<Interval3> {
         return false;
       },
       child: Material(
-          //     child: Center(
-          //   child: Text('Nice to meet You'),
-          // ));
           child: StreamBuilder<DocumentSnapshot>(
               stream: _usersStream,
               builder: (BuildContext context,
@@ -56,9 +53,7 @@ class _Interval3State extends State<Interval3> {
                 if (snapshot.hasData) {
                   print(snapshot.data);
                 }
-                // initState();
                 _usersStream.listen((userData) {
-                  // print(userData['changed'] == true);
                   if (userData['changed'] == true) {
                     if (userData['index'] == 3) {
                       print('hello');
